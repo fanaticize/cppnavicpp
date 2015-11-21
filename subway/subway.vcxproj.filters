@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="리소스 파일\SQLiteLib">
+      <UniqueIdentifier>{2da914a0-e194-4538-bf59-b5d426eaae5d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sqlite3.c">
@@ -38,5 +41,18 @@
     <ClInclude Include="targetver.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="SQLiteLib\sqlite3.exp">
+      <Filter>리소스 파일\SQLiteLib</Filter>
+    </None>
+    <None Include="test2.db">
+      <Filter>리소스 파일</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="SQLiteLib\sqlite3.lib">
+      <Filter>리소스 파일\SQLiteLib</Filter>
+    </Library>
   </ItemGroup>
 </Project>
