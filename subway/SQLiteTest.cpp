@@ -126,29 +126,160 @@ class PathNode {
 public:
 	PathNode* parentsNode;
 	Station* data;
-	int totaltime=0;
-	int totaldistance=0;
-	bool operator > (const PathNode& pn) const {
+	int totaltime = 0;
+	int distance = 0;
+	int totaltransit = 0;
+	int mode = 0;//1: shortest time, 2: shortest dest
+	/*bool operator > (const PathNode& pn) const {
+		if (this->mode == 1) {
+			if (totaltime == pn.totaltime)
+				return totaltransit > pn.totaltransit;
+			else
+				return totaltime > pn.totaltime;
+		}
+		else if (this->mode == 2) {
+			if (totaltransit == pn.totaltransit)
+				return totaltime > pn.totaltime;
+			else
+				return totaltransit > pn.totaltransit;
+		}
 		return totaltime > pn.totaltime;
+	}*/
+};
+
+struct PathNodeCompare {
+	bool operator() (PathNode* node1, PathNode* node2) {
+		if (node1->mode == 1) {
+			if (node1->totaltime == node2->totaltime)
+				return node1->totaltransit > node2->totaltransit;
+			else
+				return node1->totaltime > node2->totaltime;
+		}
+		else if (node1->mode == 2) {
+			if (node1->totaltransit == node2->totaltransit)
+				return node1->totaltime > node2->totaltime;
+			else
+				return node1->totaltransit > node2->totaltransit;
+		}
+		return node1->totaltime > node2->totaltime;
 	}
 };
+
 
 class PathController2 {
 public:
 	bool* visitList;
 	PathNode** shortestTime;
-	priority_queue<PathNode*, vector<PathNode*>, greater<PathNode*>> heap;
-	void initPath(string startStation, string endStation, vector<Line*> *lineList) {
+	priority_queue<PathNode*, vector<PathNode*>, PathNodeCompare> heap;
+	string startStation;
+	string endStation;
+	vector<Line*> *lineList;
+	void findShortestPath(string startStation, string endStation, vector<Line*> *lineList) {
+		this->startStation = startStation;
+		this->endStation = endStation;
+		this->lineList = lineList;
+		int mode = 1;
+		initPath2(mode);
+		
+		PathNode* shortestPath = calShortestPath();
+		int totalsec = shortestPath->totaltime;
+		int hour = totalsec / 3600;
+		int min = (totalsec % 3600) / 60;
+		int sec = (totalsec % 3600) % 60;
+		cout << "최단시간경로검색----"<<startStation<<"~"<<endStation << endl;
+		cout<<"최단시간: "<<hour<<"시간 "<<min<<"분 "<<sec<<"초 "<< endl;
+		cout << "환승: " << shortestPath->totaltransit << endl;
+		shortestPath = reversePath(shortestPath);
+		printPath(shortestPath);
+		/*cout << endl;
+		cout << heap.top()->totaltime << endl;
+		heap.pop();
+		cout << heap.top()->totaltime << endl;
+		heap.pop();
+		cout << heap.top()->totaltime << endl;
+		heap.pop();
+		cout << heap.top()->totaltime << endl;*/
+		while (!heap.empty()) heap.pop();
+		delete(visitList);
+		delete(shortestTime);
+		visitList = NULL;
+		shortestTime = NULL;
+	}
+
+	void findShortestTransitPath(string startStation, string endStation, vector<Line*> *lineList) {
+		this->startStation = startStation;
+		this->endStation = endStation;
+		this->lineList = lineList;
+		int mode = 2;
+		initPath2(mode);
+		PathNode* shortestPath = calShortestTransitPath();
+		int totalsec = shortestPath->totaltime;
+		int hour = totalsec / 3600;
+		int min = (totalsec % 3600) / 60;
+		int sec = (totalsec % 3600) % 60;
+		cout << "최소환승경로검색----" << startStation << "~" << endStation << endl;
+		cout << "최단시간: " << hour << "시간 " << min << "분 " << sec << "초 " << endl;
+		cout << "환승: " << shortestPath->totaltransit << endl;
+		shortestPath = reversePath(shortestPath);
+		PathNode* temp = shortestPath;
+		printPath(shortestPath);
+
+		while (!heap.empty()) heap.pop();
+		delete(visitList);
+		delete(shortestTime);
+		visitList = NULL;
+		shortestTime = NULL;
+	}
+
+	void printPath(PathNode* node) {
+		PathNode* temp = node;
+		PathNode* lastnode;
+		bool flag = true;
+		while (temp != NULL) {
+			if (flag) {
+				cout << "(" << temp->data->line->name << ", " << temp->data->name << ") ->";
+				flag = false;
+			}
+			else {
+				if (lastnode->data->line != temp->data->line) {
+					cout << "(" << lastnode->data->line->name << ", " << lastnode->data->name << ") ->";
+					cout << "(" << temp->data->line->name << ", " << temp->data->name << ") ->";
+				}
+			}
+			lastnode = temp;
+			temp = temp->parentsNode;
+		}
+		cout << "(" << lastnode->data->line->name << ", " << lastnode->data->name << ")" << endl;
+		cout << endl;
+		/*while (temp != NULL) {
+			cout << "(" << temp->data->line->name << ", " << temp->data->name << ") ->";
+			temp = temp->parentsNode;
+		}*/
+	}
+
+	PathNode* reversePath(PathNode* path) {
+		PathNode* trail;
+		PathNode* middle;
+		middle = NULL;
+		while (path != NULL) {
+			trail = middle;
+			middle = path;
+			path = path->parentsNode;
+			middle->parentsNode = trail;
+		}
+		return middle;
+	}
+
+	void initPath2(int mode) {
 		visitList = new bool[STATION_CNT];
 		shortestTime = new PathNode*[STATION_CNT];
 		for (int i = 0; i < STATION_CNT; i++) {
 			visitList[i] = false;
-			shortestTime = NULL;
+			shortestTime[i] = NULL;
 		}
 
 		Line *tempLine;
 		Station *tempStation;
-		Edge* tempEdge;
 		PathNode* tempPathNode;
 		vector<Station*> startStationList;
 		for (vector< Line* >::iterator IterPos0 = (*lineList).begin(); IterPos0 != (*lineList).end(); ++IterPos0) {
@@ -161,29 +292,33 @@ public:
 				}
 			}
 		}
-		//cout << tempStation->name << endl;
 
 		//station부분 순환
-		for (vector< Station* >::iterator IterPos0 = startStationList.begin(); IterPos0 != startStationList.end(); ++IterPos0) {
+		for (vector< Station* >::iterator IterPos0 = startStationList.begin(); IterPos0 != startStationList.end(); ++IterPos0) {	
 			tempStation = (*IterPos0);
-			visitList[tempStation->stationSeq] = true;
 			tempPathNode = new PathNode();
 			tempPathNode->parentsNode = NULL;
 			tempPathNode->data = tempStation;
-			tempPathNode->totaldistance = 0;
+			tempPathNode->distance = 0;
 			tempPathNode->totaltime = 0;
-			shortestTime[tempStation->stationSeq] = tempPathNode;
+			tempPathNode->totaltransit = 0;
+			tempPathNode->mode = mode;
 			heap.push(tempPathNode);
 		}
+	}
 
+	PathNode* calShortestPath() {
+		Edge* tempEdge;
+		PathNode* tempPathNode;
+		PathNode* insPathNode;
 		while (true) {
-			if (heap.empty()) {
+			if (heap.empty())
 				break;
-			}
+
 			tempPathNode = heap.top();
 			heap.pop();
 			if (tempPathNode->data->name == endStation) {
-				break;
+				return tempPathNode;
 			}
 			if (visitList[tempPathNode->data->stationSeq])
 				continue;
@@ -191,20 +326,70 @@ public:
 				visitList[tempPathNode->data->stationSeq] = true;
 				for (vector<Edge* >::iterator IterPos0 = tempPathNode->data->edgeList.begin(); IterPos0 != tempPathNode->data->edgeList.end(); ++IterPos0) {
 					tempEdge = (*IterPos0);
-					visitList[tempStation->stationSeq] = true;
-					tempPathNode = new PathNode();
-					tempPathNode->parentsNode = NULL;
-					tempPathNode->data = tempStation;
-					tempPathNode->totaldistance = 0;
-					tempPathNode->totaltime = 0;
-					shortestTime[tempStation->stationSeq] = tempPathNode;
-					heap.push(tempPathNode);
+					if (tempEdge->to != tempPathNode->data) {
+						insPathNode = new PathNode();
+						insPathNode->parentsNode = tempPathNode;
+						insPathNode->data = tempEdge->to;
+						insPathNode->distance = tempEdge->distance;
+						if (tempPathNode->totaltime == 0) {
+							insPathNode->totaltime = tempPathNode->totaltime + tempEdge->weight;
+						}
+						else if (tempPathNode->parentsNode->data->line != tempPathNode->data->line) {
+							insPathNode->totaltime = tempPathNode->totaltime + tempEdge->weight;
+						}
+						else
+							insPathNode->totaltime = tempPathNode->totaltime + tempEdge->weight + tempEdge->waittime;
+						insPathNode->totaltransit = tempPathNode->totaltransit;
+						insPathNode->mode = tempPathNode->mode;
+						if (tempEdge->isTransit)
+							insPathNode->totaltransit++;
+						shortestTime[tempPathNode->data->stationSeq] = insPathNode;
+						heap.push(insPathNode);
+					}
 				}
 			}
 		}
-
-
+		return NULL;
 	}
+
+	PathNode* calShortestTransitPath() {
+		Edge* tempEdge;
+		PathNode* tempPathNode;
+		PathNode* insPathNode;
+		while (true) {
+			if (heap.empty())
+				break;
+
+			tempPathNode = heap.top();
+			heap.pop();
+			if (tempPathNode->data->name == endStation) {
+				return tempPathNode;
+			}
+			if (visitList[tempPathNode->data->stationSeq])
+				continue;
+			else {
+				visitList[tempPathNode->data->stationSeq] = true;
+				for (vector<Edge* >::iterator IterPos0 = tempPathNode->data->edgeList.begin(); IterPos0 != tempPathNode->data->edgeList.end(); ++IterPos0) {
+					tempEdge = (*IterPos0);
+					if (tempEdge->to != tempPathNode->data) {
+						insPathNode = new PathNode();
+						insPathNode->parentsNode = tempPathNode;
+						insPathNode->data = tempEdge->to;
+						insPathNode->distance = tempEdge->distance;
+						insPathNode->totaltime = tempPathNode->totaltime + tempEdge->weight + tempEdge->waittime;
+						insPathNode->totaltransit = tempPathNode->totaltransit;
+						insPathNode->mode = tempPathNode->mode;
+						if (tempEdge->isTransit)
+							insPathNode->totaltransit++;
+						shortestTime[tempPathNode->data->stationSeq] = insPathNode;
+						heap.push(insPathNode);
+					}
+				}
+			}
+		}
+		return NULL;
+	}
+
 
 };
 
@@ -438,7 +623,6 @@ void setLineList(vector<Line*> *lineList) {
 		tempEdge->isTransit = false;
 		tempStation->edgeList.push_back(tempEdge);
 	}
-	cout << stationcnt << endl;
 	STATION_CNT = stationcnt;
 
 	//간선의 from 과 to 부분 stationlist에서 찾아서 연결
@@ -495,7 +679,7 @@ void setLineList(vector<Line*> *lineList) {
 		lineTo = (char *)sqlite3_column_text(pStmt, 2);
 		weight = sqlite3_column_int(pStmt, 3);
 		
-		if (isFirstLoop){
+		/*if (isFirstLoop){
 			lastLineFrom = lineFrom;
 			lastStationName = stationName;
 			for (resultLineIter = lineList->begin(); resultLineIter != lineList->end(); ++resultLineIter) {
@@ -515,9 +699,12 @@ void setLineList(vector<Line*> *lineList) {
 
 		//호선이 바뀌면 새로운 호선 push
 		if (lineFrom != lastLineFrom) {
+			//cout << "#변경: " << lastLineFrom << " " << lineFrom << " " << endl;
 			for (; resultLineIter != lineList->end(); ++resultLineIter) {
 				if ((*resultLineIter)->name == lineFrom) {
+					//cout << "##변경: " << lastLineFrom << " " << lineFrom<<" "<< (*resultLineIter)->name << endl;
 					tempLine = (*resultLineIter);
+					lastLineFrom = tempLine->name;
 					break;
 				}
 			}
@@ -528,12 +715,28 @@ void setLineList(vector<Line*> *lineList) {
 			for (resultStationIter = tempLine->stationList.begin(); resultStationIter != tempLine->stationList.end(); ++resultStationIter) {
 				if ((*resultStationIter)->name == stationName) {
 					tempFromStation = (*resultStationIter);
+					lastStationName = tempFromStation->name;
 					break;
 				}
 			}
+		}*/
+		tempToStation = NULL;
+		tempFromStation = NULL;
+		//line 부분 순환
+		for (vector< Line* >::iterator IterPos0 = lineList->begin(); IterPos0 != lineList->end(); ++IterPos0) {
+			if ((*IterPos0)->name == lineFrom) {
+				//staion부분 순환
+				for (vector< Station* >::iterator IterPos1 = (*IterPos0)->stationList.begin(); IterPos1 != (*IterPos0)->stationList.end(); ++IterPos1)
+				{
+					if ((*IterPos1)->name == stationName) {
+						tempFromStation = (*IterPos1);
+						break;
+					}
+				}
+				break;
+			}
 		}
 
-		//staion부분 순환
 		//line 부분 순환
 		for (vector< Line* >::iterator IterPos0 = lineList->begin(); IterPos0 != lineList->end(); ++IterPos0) {
 			if ((*IterPos0)->name == lineTo) {
@@ -548,7 +751,7 @@ void setLineList(vector<Line*> *lineList) {
 				break;
 			}			
 		}
-
+		//cout << tempFromStation->line->name <<" " << tempFromStation->name << " " << tempToStation->line->name << " " << tempToStation->name << endl;
 		//간선 push
 		tempEdge = new Edge();
 		tempEdge->fromStationName = tempFromStation->name;
@@ -559,6 +762,7 @@ void setLineList(vector<Line*> *lineList) {
 		tempEdge->waittime = 0;
 		tempEdge->distance = 0;
 		tempEdge->isTransit = true;
+		//cout <<tempEdge->from->line->name<<", "<< tempEdge->from->name << " "<< tempEdge->to->line->name<<", " << tempEdge->to->name << " " << tempEdge->isTransit << endl;
 		tempFromStation->edgeList.push_back(tempEdge);
 	}
 
@@ -586,17 +790,19 @@ void setLineList(vector<Line*> *lineList) {
 }
 
 int main() {
-	std::cout << "!!" << std::endl;
 	sqlite3 *pSQLite3 = NULL; // SQLite DB 객체 저장 변수
 	char    *szErrMsg = NULL; // Error 발생시 메세지를 저장하는 변수							  
-	int rst = sqlite3_open("test10.db", &pSQLite3);// 데이터베이스 열기 : 파일이 존재하지 않으면 생성한다.
+	int rst = sqlite3_open("test12.db", &pSQLite3);// 데이터베이스 열기 : 파일이 존재하지 않으면 생성한다.
 	ppSqlite = pSQLite3;
 
 	vector<Line*> lineList;
 	
 	//각호선별 역과 간선 설정()
 	setLineList(&lineList);
-
+	cout << "로딩완료" << endl;
+	PathController2 *pc2 = new PathController2();
+	pc2->findShortestPath("수원", "압구정", &lineList);
+	pc2->findShortestTransitPath("수원", "압구정", &lineList);
 	/*PathController *pc = new PathController();
 	pc->initPath("화서", "야탑", &lineList);
 	pc->calPathArr();*/
@@ -619,6 +825,19 @@ int main() {
 				cout << ", " << (*IterPos2)->waittime;
 				cout << ") ";
 			}
+			cout << endl;
+		}
+	}*/
+	/*Line *tempLine;
+	Station *tempStation;
+	Edge *tempEdge;
+	for (vector< Line* >::iterator IterPos0 = lineList.begin(); IterPos0 != lineList.end(); ++IterPos0) {
+		tempLine = (*IterPos0);
+		cout << tempLine->name << endl;
+		for (vector< Station* >::iterator IterPos1 = tempLine->stationList.begin(); IterPos1 != tempLine->stationList.end(); ++IterPos1)
+		{
+			cout << (*IterPos1)->name << ": ";
+			cout << (*IterPos1)->edgeList.size();
 			cout << endl;
 		}
 	}*/

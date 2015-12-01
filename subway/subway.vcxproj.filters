@@ -46,7 +46,7 @@
     <None Include="SQLiteLib\sqlite3.exp">
       <Filter>리소스 파일\SQLiteLib</Filter>
     </None>
-    <None Include="test10.db">
+    <None Include="test12.db">
       <Filter>리소스 파일</Filter>
     </None>
   </ItemGroup>

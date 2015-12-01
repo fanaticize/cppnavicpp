@@ -162,7 +162,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="SQLiteLib\sqlite3.exp" />
-    <None Include="test10.db" />
+    <None Include="test12.db" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="SQLiteLib\sqlite3.lib" />
