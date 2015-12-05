@@ -21,10 +21,25 @@
     <ClCompile Include="sqlite3.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="SQLiteTest.cpp">
+    <ClCompile Include="Station.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="stdafx.cpp">
+    <ClCompile Include="Line.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Edge.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="PathNode.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="SQLiteHandler.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="PathHandler.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="SubwayNaviMain.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -35,10 +50,25 @@
     <ClInclude Include="sqlite3ext.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="stdafx.h">
+    <ClInclude Include="Line.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="targetver.h">
+    <ClInclude Include="Station.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Edge.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="PathNode.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="SQLiteHandler.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="PathHandler.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="SubwayCommonDecl.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
@@ -46,7 +76,7 @@
     <None Include="SQLiteLib\sqlite3.exp">
       <Filter>리소스 파일\SQLiteLib</Filter>
     </None>
-    <None Include="test12.db">
+    <None Include="subwayDB.db">
       <Filter>리소스 파일</Filter>
     </None>
   </ItemGroup>

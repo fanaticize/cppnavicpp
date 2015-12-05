@@ -104,12 +104,12 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\protos2\Source\Repos\cppnavicpp2\subway\SQLiteLib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\protos\Desktop\대학\컴공실\cppnavicpp2 (2)\subway\SQLiteLib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\protos2\Source\Repos\cppnavicpp2\subway\SQLiteLib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\protos\Desktop\대학\컴공실\cppnavicpp2 (2)\subway\SQLiteLib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>sqlite3.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -150,19 +150,29 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Edge.cpp" />
+    <ClCompile Include="Line.cpp" />
+    <ClCompile Include="PathHandler.cpp" />
+    <ClCompile Include="PathNode.cpp" />
     <ClCompile Include="sqlite3.c" />
-    <ClCompile Include="SQLiteTest.cpp" />
-    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="SQLiteHandler.cpp" />
+    <ClCompile Include="SubwayNaviMain.cpp" />
+    <ClCompile Include="Station.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Edge.h" />
+    <ClInclude Include="Line.h" />
+    <ClInclude Include="PathHandler.h" />
+    <ClInclude Include="PathNode.h" />
     <ClInclude Include="sqlite3.h" />
     <ClInclude Include="sqlite3ext.h" />
-    <ClInclude Include="stdafx.h" />
-    <ClInclude Include="targetver.h" />
+    <ClInclude Include="SQLiteHandler.h" />
+    <ClInclude Include="Station.h" />
+    <ClInclude Include="SubwayCommonDecl.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="SQLiteLib\sqlite3.exp" />
-    <None Include="test12.db" />
+    <None Include="subwayDB.db" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="SQLiteLib\sqlite3.lib" />
